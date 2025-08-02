@@ -2,14 +2,27 @@ import os, json
 import openai
 from dotenv import load_dotenv
 from pathlib import Path
+import logging
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+logging.basicConfig(
+    filename = "/home/ec2-user/email-pipeline/logs/gpt.log",
+    level = logging.DEBUG,
+    format = "%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    filemode = "a"
+)
+
+logger = logging.getLogger("gpt")
+
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 def standardize_universities (choice_list : list[str], school_name : str) -> list[str] :
 
+    logger.debug(f"[Standardize Universities] : {choice_list}")
+    
     SCHOOL_LIST_PATH = DATA_DIR / f"{school_name}_list.json"
     
     with open(SCHOOL_LIST_PATH, encoding="utf-8") as f :
@@ -37,12 +50,12 @@ def standardize_universities (choice_list : list[str], school_name : str) -> lis
     content = response.choices[0].message.content
     
     return_list = content.split("\n")
+    logger.debug(f"[Standardize Universities] : {return_list}")
+    
     
     try :
         return return_list
-    except Exception as e :
-        print(e)
-        return choice_list
     
-if (__name__ == "__main__") :
-    print(standardize_universities(["서울대", "연세대", "고려"], "knu"))
+    except Exception as e :
+        logger.error(f"[Standardize Universities] : {e}")
+        return choice_list

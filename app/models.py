@@ -9,9 +9,6 @@ class User(Base):
     email = Column(String(255), unique=True, index=True, nullable=False)
     uuid = Column(String(36), unique=True, nullable=False)
     nickname = Column(String(255), nullable=False)
-    status = Column(
-        Integer, default=0, nullable=False
-    )  # 0: 미인증, 1: 성적대기중, 2: 인증
     grade = Column(Float, nullable=False)
     lang = Column(String(255), nullable=False)
     modify_count = Column(Integer, default=3, nullable=False)
