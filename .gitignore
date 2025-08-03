@@ -14,6 +14,7 @@ wheels/
 
 # For Secret keys
 .env
+*.zip
 
 # Internal data
 data/

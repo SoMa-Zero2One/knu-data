@@ -3,21 +3,17 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 import logging
 
-from app.database import SessionLocal, User, PartnerUniversity, Application
+from app.database import SessionLocal
+from app.models import User, PartnerUniversity, Application
 from app.schemas import WebhookData
 from app.gpt_utils import standardize_universities
 from app.utils import send_email
+from app.logging_config import setup_logging
 
-logging.basicConfig(
-    filename = "/home/ec2-user/email-pipeline/logs/webhook.log",
-    level = logging.DEBUG,
-    format = "%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-    filemode = "a"
-)
-
-logger = logging.getLogger("webhook")
+setup_logging()
 
 app = FastAPI()
+logger = logging.getLogger("webhook")
 
 
 def get_database() :
@@ -42,7 +38,7 @@ def webhook (data : WebhookData, database : Session = Depends(get_database)) :
                 email    = data.email,
                 uuid     = uuid,
                 nickname = data.nickname,
-                gpa      = data.grade,
+                grade    = data.grade,
                 lang     = data.lang
             )
             database.add(user)
@@ -69,10 +65,14 @@ def webhook (data : WebhookData, database : Session = Depends(get_database)) :
         ### Partner University DB
         logger.debug(f"[Step 7] Partner University DB : {user.id}")
         for idx, name in enumerate (std_choices, start = 1) :
-            partner_university = database.query(PartnerUniversity).filter_by(name = name).first()
-            if not partner_university : continue
+            name = name.strip()
+            if not name : break
             
+            partner_university = database.query(PartnerUniversity).filter_by(name = name).first()
             logger.debug(f"[Step 8-{idx}] Partner University DB : {name}")
+            if not partner_university : 
+                logger.debug(f"[Step 8-{idx}] not found")
+                continue
             
             app_rec = Application(
                 user_id               = user.id,
@@ -80,12 +80,12 @@ def webhook (data : WebhookData, database : Session = Depends(get_database)) :
                 choice                = idx
             )
             database.add(app_rec)
+            
         database.commit()
-        
         logger.debug(f"[Step 9] All Done")
         
-        return {"status": "success", "user_id": user.id}
+        return {"status" : "success", "user_id" : user.id}
         
     except Exception as e :
-        logger.error(f"Error: {e}")
-        raise HTTPException(500, f"Error: {e}")
+        logger.error(f"Error : {e}")
+        raise HTTPException(500, f"Error : {e}")

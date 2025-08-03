@@ -21,7 +21,7 @@ class User(Base):
 class PartnerUniversity(Base):
     __tablename__ = "partner_university"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=False) # English name
     country = Column(String(255), nullable=False)
     slot = Column(Integer, nullable=False)
     duration = Column(String(255), nullable=False)  # "1개학기" or "2개학기"
