@@ -36,4 +36,15 @@ def send_email (to_address : str, nickname : str, uuid : str, college_name : str
         smtp.send_message(msg)
         
     logger.debug(f"[Sent Email] : {to_address}")
+
+def generate_nickname (user_id : int) :
+    with open(DATA_DIR / "nickname_adjectives.txt", encoding = "utf-8") as f :
+        adjectives = f.read().splitlines()
+    with open(DATA_DIR / "nickname_nouns.txt", encoding = "utf-8") as f :
+        nouns = f.read().splitlines()
+    
+    adjective = adjectives[user_id % len(adjectives)]  
+    noun = nouns[user_id % len(nouns)]
+    
+    return f"{adjective} {noun}"
     

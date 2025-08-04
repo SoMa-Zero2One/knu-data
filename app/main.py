@@ -7,7 +7,7 @@ from app.database import SessionLocal
 from app.models import User, PartnerUniversity, Application
 from app.schemas import WebhookData
 from app.gpt_utils import standardize_universities
-from app.utils import send_email
+from app.utils import send_email, generate_nickname
 from app.logging_config import setup_logging
 
 setup_logging()
@@ -31,30 +31,32 @@ def webhook (data : WebhookData, database : Session = Depends(get_database)) :
         
         ### User DB
         logger.debug(f"[Step 1] User DB : {data.email}")
-        user = database.query(User).filter_by(email=data.email).first()
-        uuid = str(uuid4())
+        user = database.query(User).filter_by(email = data.email).first()
+        
         if not user :
+            uuid = str(uuid4())
             user = User(
                 email    = data.email,
                 uuid     = uuid,
-                nickname = data.nickname,
                 grade    = data.grade,
                 lang     = data.lang
             )
             database.add(user)
-            
+            database.flush()
+            user.nickname = generate_nickname(user.id)
+           
         else :
-            user.nickname = data.nickname
-            user.gpa      = data.grade
+            user.grade    = data.grade
             user.lang     = data.lang
+            
         database.commit()
         database.refresh(user)
         
-        logger.debug(f"[Step 2] User DB : {uuid}")
+        logger.debug(f"[Step 2] User DB : {user.uuid}")
 
         ### Send Email
         logger.debug(f"[Step 3] Send Email : {data.email}")
-        send_email(data.email, data.nickname, uuid, data.college_name)
+        send_email(data.email, user.nickname, user.uuid, data.college_name)
         logger.debug(f"[Step 4] Send Email : {data.email}")
         
         ### Standardize University
