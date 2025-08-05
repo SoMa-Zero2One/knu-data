@@ -7,6 +7,11 @@ import logging
 
 load_dotenv()
 
+smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+smtp_port = int(os.getenv("SMTP_PORT", 587))
+smtp_user = os.getenv("SMTP_USER")
+smtp_pass = os.getenv("SMTP_PASS")
+
 logger = logging.getLogger("email")
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -14,16 +19,15 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 def send_email (to_address : str, nickname : str, uuid : str, college_name : str) :
     
     logger.debug(f"[Send Email] : {to_address}")
-    smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
-    smtp_port = int(os.getenv("SMTP_PORT", 587))
-    smtp_user = os.getenv("SMTP_USER")
-    smtp_pass = os.getenv("SMTP_PASS")
 
-    with open(DATA_DIR / "email_title.txt", encoding = "utf-8") as f :
-        subject = f.read()
+    title_path = DATA_DIR / "email_title.txt"
+    body_path = DATA_DIR / "email_content_template.txt"
     
-    with open(DATA_DIR / "email_content_template.txt", encoding = "utf-8") as f :
+    with open(title_path, encoding = "utf-8") as f :
+        subject = f.read()
+    with open(body_path, encoding = "utf-8") as f :
         body = f.read().format(nickname = nickname, uuid = uuid)
+
 
     msg = MIMEText(body)
     msg["From"]     = smtp_user
@@ -36,8 +40,9 @@ def send_email (to_address : str, nickname : str, uuid : str, college_name : str
         smtp.send_message(msg)
         
     logger.debug(f"[Sent Email] : {to_address}")
+    
 
-def generate_nickname (user_id : int) :
+def generate_nickname (user_id : int) -> str :
     with open(DATA_DIR / "nickname_adjectives.txt", encoding = "utf-8") as f :
         adjectives = f.read().splitlines()
     with open(DATA_DIR / "nickname_nouns.txt", encoding = "utf-8") as f :
