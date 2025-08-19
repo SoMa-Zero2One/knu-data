@@ -20,8 +20,8 @@ def send_email (to_address : str, nickname : str, uuid : str, college_name : str
     
     logger.debug(f"[Send Email] : {to_address}")
 
-    title_path = DATA_DIR / "email_title.txt"
-    body_path = DATA_DIR / "email_content_template.txt"
+    title_path = DATA_DIR / "email/title.txt"
+    body_path = DATA_DIR / f"email/{college_name}_content_template.txt"
     
     with open(title_path, encoding = "utf-8") as f :
         subject = f.read()
@@ -43,9 +43,9 @@ def send_email (to_address : str, nickname : str, uuid : str, college_name : str
     
 
 def generate_nickname (user_id : int) -> str :
-    with open(DATA_DIR / "nickname_adjectives.txt", encoding = "utf-8") as f :
+    with open(DATA_DIR / "nickname/adjectives.txt", encoding = "utf-8") as f :
         adjectives = f.read().splitlines()
-    with open(DATA_DIR / "nickname_nouns.txt", encoding = "utf-8") as f :
+    with open(DATA_DIR / "nickname/nouns.txt", encoding = "utf-8") as f :
         nouns = f.read().splitlines()
     
     adjective = adjectives[user_id % len(adjectives)]  
