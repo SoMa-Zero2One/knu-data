@@ -12,9 +12,9 @@ class User(Base):
     grade = Column(Float, nullable=False)
     lang = Column(String(255), nullable=False)
     modify_count = Column(Integer, default=3, nullable=False)
-    created_at = Column(DateTime, default=datetime.now(UTC), nullable=False)
+    created_at = Column(DateTime, default=datetime.now(), nullable=False)
     updated_at = Column(
-        DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC), nullable=False
+        DateTime, default=datetime.now(), onupdate=datetime.now(), nullable=False
     )
 
 
@@ -25,8 +25,8 @@ class PartnerUniversity(Base):
     country = Column(String(255), nullable=False)
     slot = Column(Integer, nullable=False)
     duration = Column(String(255), nullable=False)  # "1개학기" or "2개학기"
-    created_at = Column(DateTime, default=datetime.now(UTC), nullable=False)
-    updated_at = Column(DateTime, default=datetime.now(UTC), nullable=False)
+    created_at = Column(DateTime, default=datetime.now(), nullable=False)
+    updated_at = Column(DateTime, default=datetime.now(), nullable=False)
 
 
 class Application(Base):
@@ -37,5 +37,5 @@ class Application(Base):
         Integer, ForeignKey("partner_university.id"), nullable=False
     )
     choice = Column(Integer, nullable=False)
-    created_at = Column(DateTime, default=datetime.now(UTC), nullable=False)
-    updated_at = Column(DateTime, default=datetime.now(UTC), nullable=False)
+    created_at = Column(DateTime, default=datetime.now(), nullable=False)
+    updated_at = Column(DateTime, default=datetime.now(), nullable=False)
