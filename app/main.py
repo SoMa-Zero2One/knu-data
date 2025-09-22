@@ -2,10 +2,11 @@ from uuid import uuid4
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 import logging
+import datetime
 
 from app.database import SessionLocal
 from app.models import User, PartnerUniversity, Application
-from app.schemas import WebhookData, EmailRequest, NicknameRequest
+from app.schemas import WebhookData, EmailRequest, NicknameRequest, LandingEmailRequest
 from app.gpt_utils import standardize_universities
 from app.utils import send_email, generate_nickname
 from app.logging_config import setup_logging
@@ -119,3 +120,23 @@ def send_email_endpoint(data : EmailRequest) :
     except Exception as e :
         logger.error(f"Email sending error: {e}")
         raise HTTPException(status_code=500, detail=f"이메일 전송 중 오류가 발생했습니다: {e}")
+
+
+@app.post("/landing-email")
+def landing_email_endpoint (data : LandingEmailRequest) :
+
+    try :
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        landing_file_path = "data/landing.txt"
+        
+        with open(landing_file_path, "a", encoding = "utf-8") as f :
+            f.write(f"{data.email} {current_time}\n")
+        
+        logger.debug(f"[Landing Email] Saved : {data.email} at {current_time}")
+        
+        return {"status" : "success", "message" : "이메일이 성공적으로 저장되었습니다."}
+    
+    except Exception as e :
+        logger.error(f"Landing email save error : {e}, {data.email}")
+        raise HTTPException(status_code=500, detail=f"이메일 저장 중 오류가 발생했습니다: {e}")

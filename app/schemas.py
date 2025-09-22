@@ -16,3 +16,6 @@ class EmailRequest (BaseModel) :
 
 class NicknameRequest (BaseModel) :
     user_id : int         = Field(description = "사용자 ID")
+
+class LandingEmailRequest (BaseModel) :
+    email : EmailStr      = Field(description = "랜딩 페이지에서 입력받은 이메일 주소")
